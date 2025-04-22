@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>問答頁面</title>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      text-align: center;
+      padding: 40px 20px;
+      background-color: #ffffff;
+      margin: 0;
+      transition: background-color 0.2s ease;
+    }
+    p {
+      font-size: 18px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      color: #222;
+    }
+    textarea {
+      width: 100%;
+      max-width: 400px;
+      height: 120px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      resize: none;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 20px;
+      font-size: 18px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      background-color: #ff6f61;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #e55b4d;
+    }
+    #crashScreen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 9999;
+      display: none;
+      color: white;
+      font-size: 20px;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <p>為什麼你有精神病還隱瞞和生小孩</p>
+  <textarea id="answer" placeholder="請輸入內容..."></textarea><br>
+  <button onclick="checkAnswer()">送出</button>
+
+  <div id="crashScreen">⚠️ 系統異常中... 請稍後</div>
+
+  <!-- 音效 -->
+  <audio id="errorSound" src="https://www.soundjay.com/button/sounds/beep-07.mp3" preload="auto"></audio>
+
+  <script>
+    let virusInterval = null;
+    let flashInterval = null;
+    const errorSound = document.getElementById("errorSound");
+
+    function startCrashMode() {
+      if (!virusInterval) {
+        enterFullscreen();
+        vibratePhone();
+        startFlashing();
+        document.getElementById('crashScreen').style.display = 'flex';
+        document.getElementById('answer').disabled = true;
+        document.querySelector('button').disabled = true;
+
+        virusInterval = setInterval(() => {
+          alert('❌ 錯誤：系統異常，請再試一次 ❌');
+          errorSound.play();
+          vibratePhone();
+        }, 2000);
+      }
+    }
+
+    function stopCrashMode() {
+      clearInterval(virusInterval);
+      clearInterval(flashInterval);
+      virusInterval = null;
+      flashInterval = null;
+      document.body.style.backgroundColor = "#ffffff";
+      document.getElementById('crashScreen').style.display = 'none';
+      document.getElementById('answer').disabled = false;
+      document.querySelector('button').disabled = false;
+    }
+
+    function checkAnswer() {
+      const answer = document.getElementById('answer').value.trim();
+      if (answer.length < 10) {
+        startCrashMode();
+        errorSound.play();
+      } else {
+        stopCrashMode();
+        alert('✅ 成功送出！');
+      }
+    }
+
+    function vibratePhone() {
+      if (navigator.vibrate) {
+        navigator.vibrate([300, 100, 300]);
+      }
+    }
+
+    function startFlashing() {
+      let isRed = false;
+      flashInterval = setInterval(() => {
+        document.body.style.backgroundColor = isRed ? "#ffffff" : "#ff0000";
+        isRed = !isRed;
+      }, 300);
+    }
+
+    function enterFullscreen() {
+      const docEl = document.documentElement;
+      if (docEl.requestFullscreen) {
+        docEl.requestFullscreen();
+      } else if (docEl.webkitRequestFullscreen) {
+        docEl.webkitRequestFullscreen();
+      } else if (docEl.msRequestFullscreen) {
+        docEl.msRequestFullscreen();
+      }
+    }
+
+    window.addEventListener('beforeunload', function (e) {
+      if (virusInterval) {
+        e.preventDefault();
+        e.returnValue = '你還沒完成回答，確定要離開嗎？';
+      }
+    });
+  </script>
+</body>
+</html>
